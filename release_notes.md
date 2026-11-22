@@ -55,7 +55,7 @@ Segunda versão estável do roteador de chamadas e compartilhamento de tela com 
 
 ## 🤖 Prompt para Instalação Automatizada por I.A.
 
-Copie e envie para qualquer assistente de I.A.:
+Copie e envie para qualquer assistente de I.A. (funciona diretamente mesmo sem Git instalado):
 
 ```text
 Você é um assistente técnico de automação no Windows. Execute a instalação e configuração do projeto "Bypass Janja Discord Screenshare" nesta máquina seguindo com rigor as etapas abaixo:
@@ -63,25 +63,22 @@ Você é um assistente técnico de automação no Windows. Execute a instalaçã
 1. Verifique se o WireGuard está instalado. Se não estiver, instale-o via winget:
    winget install WireGuard.WireGuard --accept-package-agreements --accept-source-agreements --silent
 
-2. Clone o repositório oficial em uma pasta temporária:
-   git clone https://github.com/eojonathanoliveira/bypass-janja-discord-screenshare.git "$env:TEMP\discord-router"
+2. Baixe o pacote oficial da release e extraia diretamente na pasta do Vencord (funciona mesmo sem Git):
+   $zipUrl = "https://github.com/eojonathanoliveira/bypass-janja-discord-screenshare/releases/latest/download/bypass-janja-discord-screenshare.zip"
+   $zipPath = "$env:TEMP\bypass-janja.zip"
+   Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
+   Expand-Archive -Path $zipPath -DestinationPath "$env:APPDATA\Vencord" -Force
 
-3. Copie os arquivos do plugin diretamente para a raiz do Vencord:
-   - Destino: "$env:APPDATA\Vencord\"
-   - Arquivos a copiar: loader.js, proton_vpn_service.js, proton_vpn_ui.js, proton_vpn.example.conf
-   - Copie a pasta assets\ para "$env:APPDATA\Vencord\assets\"
+3. Garanta que os binários do WireGuard estejam presentes em "$env:APPDATA\Vencord\bin\":
+   - O pacote já inclui os binários standalone. Caso necessário, copie wireguard.exe e wg.exe de "C:\Program Files\WireGuard\" para "$env:APPDATA\Vencord\bin\".
 
-4. Copie os binários standalone do WireGuard para "$env:APPDATA\Vencord\bin\":
-   - Crie a pasta se não existir.
-   - Copie wireguard.exe e wg.exe de "C:\Program Files\WireGuard\" para "$env:APPDATA\Vencord\bin\".
-
-5. Configure o gancho de inicialização no patcher do Vencord:
+4. Verifique o gancho de inicialização no patcher do Vencord:
    - No arquivo "$env:APPDATA\Vencord\dist\patcher.js", garanta que a primeira linha contenha:
      try { require("../loader.js"); } catch (e) {}
 
-6. Reinicie o Discord:
+5. Reinicie o Discord:
    - Finalize os processos do Discord: Stop-Process -Name Discord -Force -ErrorAction SilentlyContinue
    - Inicie o Discord novamente via "$env:LOCALAPPDATA\Discord\Update.exe --processStart Discord.exe"
 
-7. Informe ao usuário que a instalação foi concluída com sucesso! Para obter um arquivo .conf gratuito, basta acessar account.protonvpn.com/downloads.
+6. Informe ao usuário que a instalação foi concluída com sucesso! Para obter um arquivo .conf gratuito, basta acessar account.protonvpn.com/downloads.
 ```
