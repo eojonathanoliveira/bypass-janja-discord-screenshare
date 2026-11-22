@@ -1,4 +1,8 @@
-# Discord WireGuard Call Router
+# Discord WireGuard Call Router (Plugin ANTI Janja Burra)
+
+<p align="center">
+  <img src="assets/janja_burra.webp" alt="Plugin ANTI Janja Burra" width="128" style="border-radius: 14px;" />
+</p>
 
 > Roteamento inteligente e dedicado de voz, vídeo e compartilhamento de tela via WireGuard para clientes Discord modificados (Vencord).
 
@@ -6,7 +10,7 @@
 
 ## 🎯 Sobre o Projeto
 
-O **Discord WireGuard Call Router** é uma solução desenvolvida para resolver problemas de instabilidade, tela preta e carregamento infinito em transmissões de tela e chamadas de voz no Discord, frequentemente causados por rotas instáveis de operadoras ou bloqueios de tráfego UDP/WebRTC.
+O **Discord WireGuard Call Router (Plugin ANTI Janja Burra)** é uma solução desenvolvida para resolver problemas de instabilidade, tela preta e carregamento infinito em transmissões de tela e chamadas de voz no Discord, frequentemente causados por rotas instáveis de operadoras ou bloqueios de tráfego UDP/WebRTC.
 
 O plugin integra um túnel WireGuard embutido diretamente ao cliente Discord, aplicando um roteamento dividido (*split-tunneling*) que protege o tráfego de mídia enquanto preserva a rede local e as demais conexões do computador.
 

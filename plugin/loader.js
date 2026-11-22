@@ -22,10 +22,24 @@ try {
 
         // Proton VPN Service IPC Handlers
         try {
+            let cachedService = null;
+            let lastLoadTime = 0;
             const getService = () => {
                 const sPath = path.join(__dirname, "proton_vpn_service.js");
-                try { delete require.cache[require.resolve(sPath)]; } catch (_) {}
-                return require(sPath);
+                try {
+                    const mtime = fs.statSync(sPath).mtimeMs;
+                    if (!cachedService || mtime > lastLoadTime) {
+                        const code = fs.readFileSync(sPath, "utf-8");
+                        const fn = new Function("require", "__dirname", "module", "exports", code);
+                        const mod = { exports: {} };
+                        fn(require, __dirname, mod, mod.exports);
+                        cachedService = mod.exports;
+                        lastLoadTime = mtime;
+                    }
+                } catch (loadErr) {
+                    console.error("[StreamFix Loader] Error loading proton_vpn_service:", loadErr);
+                }
+                return cachedService;
             };
             const registerHandlers = (prefix) => {
                 electron.ipcMain.handle(`${prefix}Start`, async (event, conf) => {
