@@ -1,0 +1,26 @@
+# Dependências e caches
+node_modules/
+__pycache__/
+*.pyc
+
+# Arquivos de configuração sensíveis (Chaves privadas reais)
+*.conf
+!*.example.conf
+
+# Logs e arquivos de status temporários
+*.log
+proton_status.json
+eval_cmd.js
+eval_res.json
+test_*.js
+*.tmp
+
+# Binários executáveis pesados (instalados pelo install.ps1)
+/plugin/bin/
+bin/
+*.exe
+
+# Arquivos de sistema e SO
+.DS_Store
+Thumbs.db
+desktop.ini
