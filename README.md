@@ -8,7 +8,7 @@
   <a href="https://github.com/eojonathanoliveira/bypass-janja-discord-screenshare/releases"><img src="https://img.shields.io/github/v/release/eojonathanoliveira/bypass-janja-discord-screenshare?color=5865F2&label=Release&logo=github&style=for-the-badge" alt="Release" /></a>
   <a href="https://vencord.dev/"><img src="https://img.shields.io/badge/Vencord-Official%20Plugin-5865F2?logo=discord&logoColor=white&style=for-the-badge" alt="Vencord" /></a>
   <a href="https://www.wireguard.com/"><img src="https://img.shields.io/badge/WireGuard-Native%20Tunnel-88171A?logo=wireguard&logoColor=white&style=for-the-badge" alt="WireGuard" /></a>
-  <a href="https://account.protonvpn.com/security"><img src="https://img.shields.io/badge/Proton%20VPN-Free%20Tier-6D4AFF?logo=protonvpn&logoColor=white&style=for-the-badge" alt="Proton VPN" /></a>
+  <a href="https://account.protonvpn.com/downloads"><img src="https://img.shields.io/badge/Proton%20VPN-Free%20Tier-6D4AFF?logo=protonvpn&logoColor=white&style=for-the-badge" alt="Proton VPN" /></a>
   <a href="#"><img src="https://img.shields.io/badge/LAN%20Ping-0ms%20Bypass-2ecc71?logo=speedtest&logoColor=white&style=for-the-badge" alt="LAN Ping 0ms" /></a>
   <a href="#"><img src="https://img.shields.io/badge/Screenshare-1080p%2060FPS-f1c40f?logo=youtube&logoColor=white&style=for-the-badge" alt="1080p 60FPS" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License MIT" /></a>
@@ -42,7 +42,7 @@ winget install WireGuard.WireGuard
 
 Você pode usar qualquer servidor WireGuard, mas o **Proton VPN oferece configurações WireGuard 100% gratuitas e rápidas**:
 
-1. Acesse: **[account.protonvpn.com/security](https://account.protonvpn.com/security)** (ou faça login no Proton e vá na seção de Downloads / WireGuard Configuration).
+1. Acesse: **[account.protonvpn.com/downloads](https://account.protonvpn.com/downloads)** (ou faça login no Proton e vá na seção de Downloads / WireGuard Configuration).
 2. Escolha o sistema operacional (**Windows**) e selecione qualquer um dos servidores gratuitos disponíveis (ex: Estados Unidos, Holanda, Japão).
 3. Clique em **Download** para baixar o arquivo `.conf`.
 4. No Discord, entre em qualquer chamada, clique no ícone do escudo do **Bypass Janja Discord Screenshare** e carregue o arquivo `.conf` (ou cole o texto da configuração).
@@ -188,7 +188,7 @@ Você é um assistente técnico de automação no Windows. Execute a instalaçã
    - Finalize os processos do Discord: Stop-Process -Name Discord -Force -ErrorAction SilentlyContinue
    - Inicie o Discord novamente via "$env:LOCALAPPDATA\Discord\Update.exe --processStart Discord.exe"
 
-7. Informe ao usuário que a instalação foi concluída com sucesso! Para obter um arquivo .conf gratuito, basta acessar account.protonvpn.com/security.
+7. Informe ao usuário que a instalação foi concluída com sucesso! Para obter um arquivo .conf gratuito, basta acessar account.protonvpn.com/downloads.
 ```
 
 ---

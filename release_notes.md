@@ -30,7 +30,7 @@ Segunda versão estável do roteador de chamadas e compartilhamento de tela com 
 
 - **🆓 Configurações Gratuitas do Proton VPN**:
   - Documentação adicionada sobre como baixar arquivos `.conf` gratuitos de alta velocidade no link:
-    👉 [account.protonvpn.com/security](https://account.protonvpn.com/security) (seção Downloads -> WireGuard).
+    👉 [account.protonvpn.com/downloads](https://account.protonvpn.com/downloads) (seção Downloads -> WireGuard).
 
 - **🛠️ Correção e Estabilidade no Carregador IPC**:
   - Resolução do erro `RangeError: Maximum call stack size exceeded` através de carregador isolado sem dependência de resolução recursiva do Discord.
@@ -83,5 +83,5 @@ Você é um assistente técnico de automação no Windows. Execute a instalaçã
    - Finalize os processos do Discord: Stop-Process -Name Discord -Force -ErrorAction SilentlyContinue
    - Inicie o Discord novamente via "$env:LOCALAPPDATA\Discord\Update.exe --processStart Discord.exe"
 
-7. Informe ao usuário que a instalação foi concluída com sucesso! Para obter um arquivo .conf gratuito, basta acessar account.protonvpn.com/security.
+7. Informe ao usuário que a instalação foi concluída com sucesso! Para obter um arquivo .conf gratuito, basta acessar account.protonvpn.com/downloads.
 ```
