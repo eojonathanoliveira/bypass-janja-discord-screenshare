@@ -181,6 +181,38 @@
                 cursor: pointer;
             }
             .proton-close-btn:hover { color: #ffffff; }
+            .proton-version-footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-top: 14px;
+                padding-top: 10px;
+                border-top: 1px solid rgba(255, 255, 255, 0.08);
+                font-size: 12px;
+                color: #949ba4;
+            }
+            .proton-update-btn {
+                background: rgba(255, 255, 255, 0.07);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                color: #dbdee1;
+                border-radius: 4px;
+                padding: 4px 10px;
+                font-size: 11px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .proton-update-btn:hover {
+                background: rgba(255, 255, 255, 0.15);
+                color: #ffffff;
+            }
+            .proton-badge-up-to-date {
+                color: #23a55a;
+                font-weight: 600;
+            }
+            .proton-badge-updating {
+                color: #f0b232;
+                font-weight: 600;
+            }
         `;
     }
 
@@ -264,6 +296,14 @@
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
                     <button class="proton-btn secondary" id="proton-cancel-btn">Fechar</button>
                     <button class="proton-btn" id="proton-start-btn">⚡ Ativar Roteador WireGuard</button>
+                </div>
+
+                <div class="proton-version-footer">
+                    <div>
+                        <span>Versão: <b id="proton-version-tag" style="color: #dbdee1;">v1.1.2</b></span>
+                        <span id="proton-update-badge" class="proton-badge-up-to-date" style="margin-left: 6px;">● Atualizado</span>
+                    </div>
+                    <button class="proton-update-btn" id="proton-check-update-btn">🔄 Verificar Atualizações</button>
                 </div>
             </div>
         `;
@@ -375,6 +415,47 @@
             toggleBtn.disabled = false;
             await refreshModal();
         };
+
+        const checkUpdateBtn = backdrop.querySelector("#proton-check-update-btn");
+        const updateBadge = backdrop.querySelector("#proton-update-badge");
+        const versionTag = backdrop.querySelector("#proton-version-tag");
+
+        if (checkUpdateBtn) {
+            checkUpdateBtn.onclick = async () => {
+                checkUpdateBtn.disabled = true;
+                checkUpdateBtn.textContent = "Verificando...";
+                updateBadge.className = "proton-badge-updating";
+                updateBadge.textContent = "● Consultando GitHub...";
+                try {
+                    const bridge = getBridge();
+                    if (bridge && typeof bridge.checkForUpdates === "function") {
+                        const res = await bridge.checkForUpdates(true);
+                        if (res && res.updated) {
+                            versionTag.textContent = `v${res.latestVersion}`;
+                            updateBadge.className = "proton-badge-up-to-date";
+                            updateBadge.textContent = `● Atualizado para v${res.latestVersion}!`;
+                            checkUpdateBtn.textContent = "Reinicie o Discord";
+                            alert(`🎉 Plugin atualizado com sucesso para v${res.latestVersion}!\n\n${res.changelog || "Novas melhorias aplicadas."}\n\nReinicie o Discord para carregar todos os módulos.`);
+                        } else if (res && res.ok && !res.updateAvailable) {
+                            versionTag.textContent = `v${res.currentVersion || "1.1.2"}`;
+                            updateBadge.className = "proton-badge-up-to-date";
+                            updateBadge.textContent = "● Versão mais recente";
+                            checkUpdateBtn.textContent = "🔄 Verificar Atualizações";
+                        } else {
+                            updateBadge.textContent = "● " + (res?.message || "Erro ao verificar");
+                            checkUpdateBtn.textContent = "🔄 Tentar Novamente";
+                        }
+                    } else {
+                        updateBadge.textContent = "● Auto-updater não disponível";
+                        checkUpdateBtn.textContent = "🔄 Verificar Atualizações";
+                    }
+                } catch (e) {
+                    updateBadge.textContent = "● Erro de conexão";
+                    checkUpdateBtn.textContent = "🔄 Tentar Novamente";
+                }
+                checkUpdateBtn.disabled = false;
+            };
+        }
 
         refreshModal();
     }

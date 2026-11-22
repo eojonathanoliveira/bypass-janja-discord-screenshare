@@ -1,3 +1,31 @@
+# 🚀 Bypass Janja Discord Screenshare - v1.1.2
+
+Versão atualizada com sistema de auto-atualização contínua (OTA) e correção universal de privilégios de execução no Windows.
+
+---
+
+## 📋 Changelog (v1.1.2)
+
+### ✨ Principais Novidades
+- **🔄 Auto-Atualização Contínua em Background (OTA via GitHub Releases)**:
+  - O plugin agora verifica automaticamente a cada 6 horas e 20 segundos após a inicialização se há novas versões publicadas no repositório GitHub.
+  - Quando uma nova versão é lançada, os arquivos centrais (`loader.js`, `proton_vpn_service.js`, `proton_vpn_ui.js`, `version.json`) são baixados e atualizados silenciosamente no Vencord.
+  - Adicionado botão manual **"🔄 Verificar Atualizações"** e selo de status de versão no rodapé do modal do WireGuard.
+
+- **🛡️ Correção do Mecanismo de Elevação (Zero Dependência de SSH)**:
+  - Corrigido o erro relatado de `Connection refused` na porta 22 (`ssh: connect to host 127.0.0.1 port 22: Connection refused`).
+  - O serviço agora utiliza um pipeline triplo nativo:
+    1. Execução direta (se já executado com privilégios de administrador);
+    2. Tarefa Agendada com privilégios de `SYSTEM` (criada no instalador, 0 prompts UAC);
+    3. Elevação nativa do Windows via PowerShell (`Start-Process -Verb RunAs`).
+
+- **🎯 Proteção Total de Queda de Internet**:
+  - Sub-redes dedicadas exclusivamente ao Discord (`66.22.192.0/18` + active voice IP).
+  - Remoção de sequestro de DNS. Se o `.conf` do WireGuard expirar, sua internet normal, navegadores e jogos permanecem 100% online.
+  - Watchdog de handshake automático que encerra o túnel com segurança se o servidor parar de responder.
+
+---
+
 # 🚀 Bypass Janja Discord Screenshare - v1.1.0
 
 Segunda versão estável do roteador de chamadas e compartilhamento de tela com WireGuard embutido para Discord (Vencord).

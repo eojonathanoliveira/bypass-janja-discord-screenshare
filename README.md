@@ -136,6 +136,7 @@ O plugin é reconhecido nativamente pelo Vencord em **Configurações de Usuári
 [ Rede Local (192.168.0.x / LAN) ] ──────────────────────────▶ [ Roteador Local Direto ]
 ```
 
+- **Auto-Atualização Contínua (OTA)**: O plugin verifica novas versões lançadas no GitHub automaticamente em segundo plano (na inicialização e a cada 6 horas) ou manualmente pelo botão "Verificar Atualizações" no rodapé do modal, mantendo seu Vencord sempre com a versão mais recente sem precisar reinstalar nada!
 - **Apenas Discord por Padrão**: O túnel opera em modo exclusivo para chamadas, streams e voz do Discord (`66.22.192.0/18` + IP dinâmico do servidor ativo). Seus navegadores, downloads, Steam e jogos não passam pela VPN e **sua internet nunca cai** mesmo se a sessão do `.conf` expirar.
 - **DNS Intocado e Seguro**: As diretivas de DNS do arquivo `.conf` são ignoradas propositalmente para manter o DNS original da sua máquina intacto, evitando falhas de resolução ao encerrar a VPN.
 - **Watchdog Automático**: Se o servidor da VPN desconectar ou a validade expirar, o serviço detecta a ausência de handshake e encerra o túnel automaticamente, restaurando as rotas sem travar nada.
@@ -150,9 +151,10 @@ Quando extraído em `%APPDATA%\Vencord\`, todos os arquivos ficam organizados di
 
 ```text
 %APPDATA%\Vencord\
-├── loader.js                      # Carregador e ponte IPC Electron
+├── loader.js                      # Carregador, auto-updater e ponte IPC Electron
+├── version.json                   # Controle de versão semântica e atualização OTA
 ├── proton_vpn_service.js          # Gerenciador do motor WireGuard e rotas
-├── proton_vpn_ui.js               # Componente de interface nativa
+├── proton_vpn_ui.js               # Componente de interface nativa e painel
 ├── proton_vpn.example.conf        # Modelo de configuração de exemplo
 ├── install.bat                    # Atalho do instalador em 1 clique
 ├── install.ps1                    # Script PowerShell de automação

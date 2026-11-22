@@ -54,6 +54,9 @@ try {
                 electron.ipcMain.handle(`${prefix}RouteVoiceIP`, async (event, ip) => {
                     return getService().addVoiceRoute(ip);
                 });
+                electron.ipcMain.handle(`${prefix}CheckForUpdates`, async (event, force) => {
+                    return checkForUpdates(force);
+                });
             };
             registerHandlers("ProtonVPN_");
             registerHandlers("VencordPluginNative_ProtonVPN_");
@@ -65,6 +68,135 @@ try {
 } catch (e) {
     console.warn("[StreamFix Loader] Failed to register IPC handlers:", e);
 }
+
+// 1.1 Auto-Updater Module (Verifica e atualiza o plugin automaticamente via GitHub Releases)
+const GITHUB_REPO = "eojonathanoliveira/bypass-janja-discord-screenshare";
+
+function getLocalVersion() {
+    try {
+        const vPath = path.join(__dirname, "version.json");
+        if (fs.existsSync(vPath)) {
+            const data = JSON.parse(fs.readFileSync(vPath, "utf-8"));
+            if (data.version) return data.version;
+        }
+    } catch (_) {}
+    return "1.1.2";
+}
+
+function compareVersions(v1, v2) {
+    const p1 = (v1 || "0").split(".").map(n => parseInt(n, 10) || 0);
+    const p2 = (v2 || "0").split(".").map(n => parseInt(n, 10) || 0);
+    const len = Math.max(p1.length, p2.length);
+    for (let i = 0; i < len; i++) {
+        const a = p1[i] || 0;
+        const b = p2[i] || 0;
+        if (a > b) return 1;
+        if (a < b) return -1;
+    }
+    return 0;
+}
+
+function downloadFile(url, destPath) {
+    return new Promise((resolve, reject) => {
+        const get = (targetUrl, redirects = 0) => {
+            if (redirects > 5) return reject(new Error("Muitos redirecionamentos"));
+            const client = targetUrl.startsWith("https") ? require("https") : require("http");
+            client.get(targetUrl, { headers: { "User-Agent": "BypassJanjaDiscordScreenshare-Updater" } }, (res) => {
+                if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                    return get(res.headers.location, redirects + 1);
+                }
+                if (res.statusCode !== 200) {
+                    res.resume();
+                    return reject(new Error(`Falha HTTP ${res.statusCode}`));
+                }
+                const tmpPath = destPath + ".tmp";
+                const fileStream = fs.createWriteStream(tmpPath);
+                res.pipe(fileStream);
+                fileStream.on("finish", () => {
+                    fileStream.close(() => {
+                        try {
+                            fs.renameSync(tmpPath, destPath);
+                            resolve();
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                });
+            }).on("error", reject);
+        };
+        get(url);
+    });
+}
+
+async function checkForUpdates(force = false) {
+    const currentVersion = getLocalVersion();
+    try {
+        const https = require("https");
+        const options = {
+            hostname: "api.github.com",
+            path: `/repos/${GITHUB_REPO}/releases/latest`,
+            headers: { "User-Agent": "BypassJanjaDiscordScreenshare-Updater" }
+        };
+        const data = await new Promise((resolve) => {
+            https.get(options, (res) => {
+                let body = "";
+                res.on("data", chunk => body += chunk);
+                res.on("end", () => {
+                    try { resolve(JSON.parse(body)); } catch (_) { resolve(null); }
+                });
+            }).on("error", () => resolve(null));
+        });
+
+        if (!data || !data.tag_name) {
+            return { ok: false, currentVersion, message: "Nao foi possivel consultar os servidores do GitHub." };
+        }
+
+        const remoteTag = data.tag_name.replace(/^v/, "").trim();
+        const hasUpdate = compareVersions(remoteTag, currentVersion) > 0;
+
+        if (!hasUpdate && !force) {
+            return { ok: true, updateAvailable: false, currentVersion, latestVersion: remoteTag };
+        }
+
+        console.log(`[AutoUpdater] Nova versao detectada no GitHub: v${remoteTag} (versao instalada: v${currentVersion}). Aplicando atualizacao automatica...`);
+
+        const filesToUpdate = ["loader.js", "proton_vpn_service.js", "proton_vpn_ui.js"];
+        for (const file of filesToUpdate) {
+            const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/${file}`;
+            await downloadFile(rawUrl, path.join(__dirname, file));
+            console.log(`[AutoUpdater] Arquivo atualizado: ${file}`);
+        }
+
+        const vPath = path.join(__dirname, "version.json");
+        fs.writeFileSync(vPath, JSON.stringify({
+            version: remoteTag,
+            name: "Bypass Janja Discord Screenshare",
+            repo: GITHUB_REPO,
+            lastUpdated: new Date().toISOString()
+        }, null, 2), "utf-8");
+
+        console.log(`[AutoUpdater] Atualizacao para v${remoteTag} concluida com sucesso!`);
+        return {
+            ok: true,
+            updateAvailable: true,
+            updated: true,
+            currentVersion,
+            latestVersion: remoteTag,
+            changelog: data.body || ""
+        };
+    } catch (err) {
+        console.error("[AutoUpdater] Erro ao atualizar:", err);
+        return { ok: false, currentVersion, error: String(err.message || err) };
+    }
+}
+
+// Verificacao automatica em segundo plano (20s apos inicio e a cada 6h)
+setTimeout(() => {
+    checkForUpdates().catch(() => {});
+}, 20000);
+setInterval(() => {
+    checkForUpdates().catch(() => {});
+}, 6 * 3600 * 1000);
 
 // 2. Remote Command Evaluation Bridge (Reads eval_cmd.js and writes eval_res.json)
 try {
@@ -179,7 +311,8 @@ fs.readFileSync = function (filePath, options) {
                             start: (conf, mode) => ipcRenderer.invoke("ProtonVPN_Start", conf, mode),
                             stop: () => ipcRenderer.invoke("ProtonVPN_Stop"),
                             getStatus: () => ipcRenderer.invoke("ProtonVPN_GetStatus"),
-                            routeVoiceIP: (ip) => ipcRenderer.invoke("ProtonVPN_RouteVoiceIP", ip)
+                            routeVoiceIP: (ip) => ipcRenderer.invoke("ProtonVPN_RouteVoiceIP", ip),
+                            checkForUpdates: (force) => ipcRenderer.invoke("ProtonVPN_CheckForUpdates", force)
                         };
                         if (process.contextIsolated && contextBridge.exposeInMainWorld) {
                             try { contextBridge.exposeInMainWorld("StreamFixBridge", bridgeObj); } catch (_) {}

@@ -21,18 +21,25 @@ function sleepSync(ms: number) {
 }
 
 function runWireGuardCmd(args: string) {
+    // 1. Tentar execucao direta (se com privilegios administrativos)
     try {
         return execSync(`"${WIREGUARD_EXE}" ${args}`, { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"], shell: "cmd.exe" });
-    } catch (_) {
-        const homeDir = process.env.USERPROFILE || "";
-        const adminKey = path.join(homeDir, ".ssh", "id_ed25519");
-        let keyFlag = "";
-        if (fs.existsSync(adminKey)) {
-            keyFlag = `-i "${adminKey}" `;
+    } catch (e1) {}
+
+    // 2. Tentar Tarefa Agendada (privilegios SYSTEM)
+    try {
+        const cmdFile = path.join(DATA_DIR, "wireguard_cmd.txt");
+        fs.writeFileSync(cmdFile, args, "utf-8");
+        const res = execSync('schtasks /Run /TN "BypassJanjaWireGuard"', { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"], shell: "cmd.exe" });
+        if (res.includes("SUCESSO") || res.includes("SUCCESS")) {
+            sleepSync(600);
+            return res;
         }
-        const sshCmd = `ssh ${keyFlag}-o StrictHostKeyChecking=no -o BatchMode=yes 127.0.0.1 "\"${WIREGUARD_EXE}\" ${args}"`;
-        return execSync(sshCmd, { encoding: "utf-8", shell: "cmd.exe" });
-    }
+    } catch (e2) {}
+
+    // 3. Fallback Universal: Elevacao UAC nativa via PowerShell
+    const psCmd = `Start-Process -FilePath '${WIREGUARD_EXE}' -ArgumentList '${args.replace(/'/g, "''")}' -Verb RunAs -WindowStyle Hidden -Wait`;
+    return execSync(`powershell -NoProfile -WindowStyle Hidden -Command "${psCmd}"`, { encoding: "utf-8", shell: "cmd.exe" });
 }
 
 export function getActiveTunnelName(): string | null {

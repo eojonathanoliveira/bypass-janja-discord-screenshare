@@ -59,7 +59,7 @@ if (Test-Path (Join-Path $currentDir "bin\wireguard.exe")) {
 
 # 2. Copiar arquivos base do plugin diretamente para a raiz do Vencord
 Write-Host "[2/3] Copiando arquivos para $vencordDir..." -ForegroundColor Yellow
-$baseFiles = @("loader.js", "proton_vpn_service.js", "proton_vpn_ui.js", "proton_vpn.example.conf")
+$baseFiles = @("loader.js", "proton_vpn_service.js", "proton_vpn_ui.js", "proton_vpn.example.conf", "version.json")
 foreach ($f in $baseFiles) {
     $src = Join-Path $currentDir $f
     if (Test-Path $src) {
