@@ -26,15 +26,26 @@ O plugin integra um túnel WireGuard embutido diretamente ao cliente Discord, ap
 
 ---
 
-## ⚡ Dependência do WireGuard (1 Comando Simples)
+## 📋 Pré-requisitos do Sistema
 
-Se você ainda não possui o WireGuard instalado no seu computador, basta executar **1 comando** no Prompt de Comando (CMD) ou PowerShell:
+Para utilizar o **Bypass Janja Discord Screenshare**, você precisará do cliente **Discord Desktop**, do modificador **Vencord** e do motor de rede **WireGuard** instalados no computador.
+
+Você pode instalar os 3 pré-requisitos em **1 linha de comando** via `winget` (Prompt de Comando ou PowerShell) ou baixá-los diretamente pelos sites oficiais:
 
 ```cmd
-winget install WireGuard.WireGuard
+winget install Discord.Discord Vendicated.Vencord WireGuard.WireGuard
 ```
 
-*(O instalador `install.bat` também detecta e instala o WireGuard automaticamente caso você não o tenha).*
+### Links Oficiais e Instalação Individual:
+
+| Software | Descrição | Link Oficial (Fonte) | Comando Winget |
+| :--- | :--- | :--- | :--- |
+| **Discord Desktop** | Cliente oficial do Discord para Windows | 🌐 [discord.com/download](https://discord.com/download) | `winget install Discord.Discord` |
+| **Vencord** | Modificador de cliente leve para Discord | 🌐 [vencord.dev/download](https://vencord.dev/download) | `winget install Vendicated.Vencord` |
+| **WireGuard** | Motor de túnel e roteamento de rede | 🌐 [wireguard.com/install](https://www.wireguard.com/install/) | `winget install WireGuard.WireGuard` |
+
+> [!TIP]
+> O script de instalação `install.bat` também detecta e instala o WireGuard automaticamente caso você ainda não o tenha.
 
 ---
 

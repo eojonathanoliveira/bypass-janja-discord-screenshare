@@ -29,12 +29,15 @@ Segunda versão estável do roteador de chamadas e compartilhamento de tela com 
   - O arquivo `bypass-janja-discord-screenshare.zip` agora espelha 1:1 a pasta raiz do Vencord (`%APPDATA%\Vencord\`).
   - **Instalação sem comandos**: basta extrair o ZIP diretamente dentro de `%APPDATA%\Vencord\` e reiniciar o Discord!
 
-- **⚡ Dependência WireGuard via Winget**:
-  - Instalação oficial do WireGuard simplificada para apenas **1 comando**:
+- **📋 Pré-requisitos com Suporte a Winget e Links Oficiais**:
+  - Documentados os 3 pré-requisitos essenciais com links fonte e comandos `winget`:
+    - **Discord Desktop**: [discord.com/download](https://discord.com/download) (`winget install Discord.Discord`)
+    - **Vencord**: [vencord.dev/download](https://vencord.dev/download) (`winget install Vendicated.Vencord`)
+    - **WireGuard**: [wireguard.com/install](https://www.wireguard.com/install/) (`winget install WireGuard.WireGuard`)
+  - Comando único para instalar todos de uma vez:
     ```cmd
-    winget install WireGuard.WireGuard
+    winget install Discord.Discord Vendicated.Vencord WireGuard.WireGuard
     ```
-  - O script `install.bat` / `install.ps1` agora verifica automaticamente a presença do WireGuard e executa o winget caso necessário.
 
 - **🆓 Configurações Gratuitas do Proton VPN**:
   - Documentação adicionada sobre como baixar arquivos `.conf` gratuitos de alta velocidade no link:
