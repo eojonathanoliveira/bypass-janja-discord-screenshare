@@ -21,6 +21,7 @@ bin/
 *.exe
 
 # Arquivos de sistema e SO
+*.zip
 .DS_Store
 Thumbs.db
 desktop.ini

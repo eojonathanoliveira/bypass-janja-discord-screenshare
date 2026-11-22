@@ -30,8 +30,8 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "WireGuardCallRouter",
-    description: "Plugin ANTI Janja Burra - Roteia voz, vídeo e compartilhamento de tela do Discord via WireGuard embutido, preservando a rede local.",
+    name: "BypassJanjaDiscordScreenshare",
+    description: "Bypass janja discord screenshare - Roteamento inteligente de voz, vídeo e compartilhamento de tela via WireGuard embutido, preservando a rede local.",
     authors: [
         {
             name: "Jonathan Oliveira",

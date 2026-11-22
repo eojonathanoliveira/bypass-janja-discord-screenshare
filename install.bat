@@ -1,8 +1,8 @@
 @echo off
-title Instalador - Discord WireGuard Call Router
+title Instalador - Bypass Janja Discord Screenshare
 cd /d "%~dp0"
 echo ========================================================
-echo   Instalador - Discord WireGuard Call Router
+echo   Bypass Janja Discord Screenshare - Instalador Vencord
 echo ========================================================
 echo.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0install.ps1"

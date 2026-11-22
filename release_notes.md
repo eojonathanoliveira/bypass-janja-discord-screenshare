@@ -1,102 +1,83 @@
-# 🚀 Discord WireGuard Call Router - v1.0.0
+# 🚀 Bypass Janja Discord Screenshare - v1.1.0
 
-Primeira versão estável do roteador de chamadas e compartilhamento de tela com WireGuard embutido para Discord (Vencord).
-
----
-
-## 📋 Changelog (v1.0.0)
-
-### ✨ Funcionalidades e Melhorias
-- **⚡ Motor WireGuard 100% Embutido**:
-  - Opera de forma autônoma utilizando binários dedicados em `%APPDATA%\Vencord\bin\wireguard.exe`.
-  - Não requer manter o aplicativo desktop oficial do WireGuard aberto.
-  - Elevação de privilégios automática via serviço OpenSSH local (`127.0.0.1`), sem janelas de confirmação UAC.
-
-- **🛡️ Split-Tunneling com Preservação da Rede Local (LAN)**:
-  - Roteia exclusivamente os pacotes WebRTC de voz, vídeo e compartilhamento de tela pela VPN.
-  - Preserva 100% a rede local (`192.168.0.0/16`): conexões SSH, jogos na LAN, compartilhamento de arquivos e ferramentas como Sunshine/Moonlight continuam em velocidade nativa e sem desvios.
-  - Filtro inteligente de IPv6: remove rotas `::/0` e endereços IPv6 incompatíveis, evitando perda de pacotes e carregamento infinito em servidores gratuitos.
-
-- **🎨 Interface Integrada ao Discord**:
-  - Botão nativo com ícone de escudo (`#proton-vpn-voice-btn`) inserido diretamente na barra de controles de chamada (`voiceButtonsContainer`), logo antes do botão de desconectar.
-  - Indicador visual em tempo real: acende em verde (`🟢`) quando o túnel seguro está ativo.
-  - Modal integrado para carregar arquivo `.conf`, visualizar status da conexão e alternar o serviço com 1 clique.
-
-- **💎 Compatibilidade com FakeNitro e Troca de Servidores**:
-  - Totalmente compatível com transmissões em 1080p / 60fps / Fonte (remoção de qualquer limitação em 720p).
-  - Liberdade total para alternar entre servidores e canais de voz sem reconexões forçadas.
-
-- **🐛 Correções de Erros Críticos**:
-  - Correção definitiva do erro `Tunnel already installed and running` através de verificação win32 rápida via `sc.exe` (< 10ms).
-  - Eliminação de estouro de pilha (`RangeError: Maximum call stack size exceeded`) no canal IPC do Electron.
+Segunda versão estável do roteador de chamadas e compartilhamento de tela com WireGuard embutido para Discord (Vencord).
 
 ---
 
-## 📖 Manual de Instalação Manual (Passo a Passo)
+## 📋 Changelog (v1.1.0)
 
-Caso prefira não executar o script automático `install.ps1`, siga os passos abaixo:
+### ✨ Principais Novidades
+- **🎨 Nova Identidade Visual - "Bypass Janja Discord Screenshare"**:
+  - Modal estilizado com banner e avatar caricatural embutido em alta resolução.
+  - Título oficial atualizado no cabeçalho e na barra de controle de voz.
+  - Badge dedicada `WIREGUARD SCREEN & VOICE ROUTER`.
 
-### 1. Pré-requisitos
-- Sistema operacional Windows 10 ou 11.
-- Discord Desktop instalado.
-- Vencord instalado no Discord.
+- **📦 Pacote de Instalação Simplificado (Extrair e Usar)**:
+  - Eliminação completa de pastas intermediárias confusas (`/plugin`).
+  - O arquivo `bypass-janja-discord-screenshare.zip` agora espelha 1:1 a pasta raiz do Vencord (`%APPDATA%\Vencord\`).
+  - **Instalação sem comandos**: basta extrair o ZIP diretamente dentro de `%APPDATA%\Vencord\` e reiniciar o Discord!
 
-### 2. Copiar os Arquivos do Plugin
-1. Pressione `Win + R`, digite `%APPDATA%\Vencord` e pressione Enter.
-2. Copie os seguintes arquivos da pasta `plugin/` deste repositório para `%APPDATA%\Vencord\`:
-   - `loader.js`
-   - `proton_vpn_service.js`
-   - `proton_vpn_ui.js`
+- **⚡ Dependência WireGuard via Winget**:
+  - Instalação oficial do WireGuard simplificada para apenas **1 comando**:
+    ```cmd
+    winget install WireGuard.WireGuard
+    ```
+  - O script `install.bat` / `install.ps1` agora verifica automaticamente a presença do WireGuard e executa o winget caso necessário.
 
-### 3. Configurar os Binários do WireGuard
-1. Dentro de `%APPDATA%\Vencord\`, crie uma pasta chamada `bin` (caso não exista).
-2. Obtenha os arquivos `wireguard.exe` e `wg.exe` (localizados em `C:\Program Files\WireGuard\` se o WireGuard estiver instalado) e copie-os para `%APPDATA%\Vencord\bin\`.
+- **🆓 Configurações Gratuitas do Proton VPN**:
+  - Documentação adicionada sobre como baixar arquivos `.conf` gratuitos de alta velocidade no link:
+    👉 [account.protonvpn.com/security](https://account.protonvpn.com/security) (seção Downloads -> WireGuard).
 
-### 4. Vincular o Carregador ao Vencord
-1. Abra o arquivo `%APPDATA%\Vencord\dist\patcher.js` em um editor de texto (como Bloco de Notas ou VS Code).
-2. Na primeiríssima linha do arquivo, adicione o seguinte trecho:
-   ```javascript
-   try { require("../loader.js"); } catch (e) {}
-   ```
-3. Salve o arquivo.
+- **🛠️ Correção e Estabilidade no Carregador IPC**:
+  - Resolução do erro `RangeError: Maximum call stack size exceeded` através de carregador isolado sem dependência de resolução recursiva do Discord.
+  - Sincronização e resposta do status da VPN em tempo real (< 10ms).
 
-### 5. Ativação no Discord
-1. Reinicie o Discord (pressione `Ctrl + R` ou feche e abra o aplicativo).
-2. Entre em qualquer canal de voz.
-3. Clique no ícone de escudo que aparecerá ao lado do botão de desconectar.
-4. Carregue seu arquivo `.conf` (ou cole o texto da configuração) e clique em **⚡ Ativar Roteador WireGuard**.
+---
+
+## 🚀 Como Instalar
+
+### Método 1: Extrair e Reiniciar (Sem Comandos) ⭐ RECOMENDADO
+1. Baixe o arquivo **`bypass-janja-discord-screenshare.zip`** anexado a esta Release.
+2. Pressione `Win + R`, digite `%APPDATA%\Vencord` e pressione Enter.
+3. Extraia todos os arquivos do ZIP diretamente dentro da pasta `%APPDATA%\Vencord\`.
+4. Reinicie o Discord (`Ctrl + R`).
+
+### Método 2: Instalador em 1 Clique
+1. Baixe o ZIP e execute `install.bat` com duplo clique.
+2. O instalador cuidará de copiar os arquivos, instalar o WireGuard se necessário e ativar o plugin.
+3. Reinicie o Discord.
 
 ---
 
 ## 🤖 Prompt para Instalação Automatizada por I.A.
 
-Copie e cole o prompt abaixo no seu assistente de Inteligência Artificial (ChatGPT, Claude, Cursor, Copilot, Antigravity, etc.) para que ele execute a configuração completa automaticamente na sua máquina:
+Copie e envie para qualquer assistente de I.A.:
 
 ```text
-Você é um assistente técnico de automação no Windows. Execute a instalação e configuração do projeto "Discord WireGuard Call Router" nesta máquina seguindo com rigor as etapas abaixo:
+Você é um assistente técnico de automação no Windows. Execute a instalação e configuração do projeto "Bypass Janja Discord Screenshare" nesta máquina seguindo com rigor as etapas abaixo:
 
-1. Clone o repositório oficial em uma pasta temporária:
-   git clone https://github.com/eojonathanoliveira/discord-wireguard-call-router.git "$env:TEMP\discord-router"
+1. Verifique se o WireGuard está instalado. Se não estiver, instale-o via winget:
+   winget install WireGuard.WireGuard --accept-package-agreements --accept-source-agreements --silent
 
-2. Copie os arquivos principais do plugin para o diretório do Vencord:
+2. Clone o repositório oficial em uma pasta temporária:
+   git clone https://github.com/eojonathanoliveira/bypass-janja-discord-screenshare.git "$env:TEMP\discord-router"
+
+3. Copie os arquivos do plugin diretamente para a raiz do Vencord:
    - Destino: "$env:APPDATA\Vencord\"
-   - Arquivos a copiar: `plugin\loader.js`, `plugin\proton_vpn_service.js`, `plugin\proton_vpn_ui.js`
+   - Arquivos a copiar: loader.js, proton_vpn_service.js, proton_vpn_ui.js, proton_vpn.example.conf
+   - Copie a pasta assets\ para "$env:APPDATA\Vencord\assets\"
 
-3. Garanta os binários do motor WireGuard:
-   - Crie o diretório "$env:APPDATA\Vencord\bin" (se não existir).
-   - Se o WireGuard já estiver instalado em "C:\Program Files\WireGuard\", copie `wireguard.exe` e `wg.exe` para "$env:APPDATA\Vencord\bin\".
+4. Copie os binários standalone do WireGuard para "$env:APPDATA\Vencord\bin\":
+   - Crie a pasta se não existir.
+   - Copie wireguard.exe e wg.exe de "C:\Program Files\WireGuard\" para "$env:APPDATA\Vencord\bin\".
 
-4. Configure o gancho de inicialização (autoload) no Vencord:
-   - Verifique o arquivo "$env:APPDATA\Vencord\dist\patcher.js".
-   - Se o arquivo ainda não contiver `loader.js`, insira exatamente na primeira linha:
+5. Configure o gancho de inicialização no patcher do Vencord:
+   - No arquivo "$env:APPDATA\Vencord\dist\patcher.js", garanta que a primeira linha contenha:
      try { require("../loader.js"); } catch (e) {}
 
-5. Reinicie o Discord para aplicar as alterações:
-   - Finalize os processos do Discord com Stop-Process -Name Discord -Force.
-   - Inicie o Discord novamente via "$env:LOCALAPPDATA\Discord\Update.exe --processStart Discord.exe".
+6. Reinicie o Discord:
+   - Finalize os processos do Discord: Stop-Process -Name Discord -Force -ErrorAction SilentlyContinue
+   - Inicie o Discord novamente via "$env:LOCALAPPDATA\Discord\Update.exe --processStart Discord.exe"
 
-6. Valide a instalação:
-   - Confirme que os arquivos estão presentes em "$env:APPDATA\Vencord\".
-   - Confirme que o Discord está em execução.
-   - Informe ao usuário que a instalação foi concluída e oriente-o a entrar em uma chamada e clicar no ícone de escudo para ativar a rota.
+7. Informe ao usuário que a instalação foi concluída com sucesso! Para obter um arquivo .conf gratuito, basta acessar account.protonvpn.com/security.
 ```
