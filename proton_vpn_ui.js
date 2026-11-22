@@ -240,6 +240,24 @@
                     <span id="proton-file-name" style="font-size: 13px; color: #949ba4;">Nenhum arquivo selecionado</span>
                 </div>
 
+                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin: 10px 0 6px 0; color: #b5bac1;">Modo de Roteamento</div>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #dbdee1; cursor: pointer;">
+                        <input type="radio" name="proton-routing-mode" value="discord_only" checked style="margin-top: 3px; cursor: pointer;">
+                        <div>
+                            <div><b>🎯 Apenas Discord (Voz, Vídeo e Telas)</b> <span style="font-size: 11px; color: #23a55a; font-weight: bold;">[RECOMENDADO]</span></div>
+                            <div style="font-size: 12px; color: #949ba4;">Roteia exclusivamente o tráfego do Discord. Sua navegação, Steam e jogos não são tocados e <b>sua internet nunca cai</b> se o .conf expirar.</div>
+                        </div>
+                    </label>
+                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #dbdee1; cursor: pointer;">
+                        <input type="radio" name="proton-routing-mode" value="full" style="margin-top: 3px; cursor: pointer;">
+                        <div>
+                            <div><b>🌐 Todo o Tráfego do PC (Exceto LAN 192.168.0.x)</b></div>
+                            <div style="font-size: 12px; color: #949ba4;">Roteia toda a conexão do PC pela VPN, preservando a rede local.</div>
+                        </div>
+                    </label>
+                </div>
+
                 <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: #b5bac1;">Conteúdo da Configuração (.conf)</div>
                 <textarea class="proton-textarea" id="proton-conf-text" placeholder="[Interface]\nPrivateKey = ...\nAddress = ...\n\n[Peer]\nPublicKey = ...\nEndpoint = ..."></textarea>
 
@@ -287,10 +305,22 @@
                 confTextArea.value = st.savedConfig;
                 fileNameSpan.textContent = "proton_vpn.conf (salvo)";
             }
-            if (st.active) {
+            if (st.routingMode) {
+                const radio = backdrop.querySelector(`input[name="proton-routing-mode"][value="${st.routingMode}"]`);
+                if (radio) radio.checked = true;
+            }
+            if (st.expired) {
+                card.className = "proton-status-card";
+                statusTitle.textContent = "⚠️ Sessão Expirada (Internet Protegida)";
+                statusDesc.textContent = "O túnel foi desativado automaticamente para sua conexão normal não cair. Baixe um novo .conf gratuito.";
+                toggleBtn.style.display = "none";
+                startBtn.textContent = "⚡ Ativar Novo .conf";
+                if (btn) btn.classList.remove("active");
+            } else if (st.active) {
                 card.className = "proton-status-card running";
                 statusTitle.textContent = "🟢 Roteador Ativo (WireGuard Embutido)";
-                statusDesc.textContent = `Endpoint: ${st.endpoint || "Conectado"} | LAN 192.168.0.x Direta`;
+                const modeLabel = st.routingMode === "full" ? "Toda Internet (Exceto LAN)" : "Apenas Discord (Voz/Vídeo)";
+                statusDesc.textContent = `Modo: ${modeLabel} | Endpoint: ${st.endpoint || "Conectado"}`;
                 toggleBtn.style.display = "block";
                 toggleBtn.textContent = "Desconectar";
                 startBtn.textContent = "⚡ Reiniciar Conexão";
@@ -311,12 +341,13 @@
                 alert("Por favor, carregue ou cole o conteúdo do arquivo .conf!");
                 return;
             }
+            const mode = backdrop.querySelector("input[name='proton-routing-mode']:checked")?.value || "discord_only";
             startBtn.disabled = true;
             startBtn.textContent = "Iniciando WireGuard...";
             try {
                 const bridge = getBridge();
                 if (bridge && typeof bridge.start === "function") {
-                    const res = await bridge.start(text);
+                    const res = await bridge.start(text, mode);
                     if (res && res.ok) {
                         statusTitle.textContent = "🟢 Conectado com Sucesso!";
                         statusDesc.textContent = "O túnel WireGuard embutido está ativo e pronto.";
@@ -395,6 +426,28 @@
             }
         });
     }
+
+    // Monitoramento de IP dinamico do servidor de voz ativo do Discord
+    let lastRoutedVoiceIp = null;
+    setInterval(() => {
+        try {
+            const bridge = getBridge();
+            if (!bridge || typeof bridge.routeVoiceIP !== "function") return;
+            const rtcStore = window.Vencord?.Webpack?.findStore && window.Vencord.Webpack.findStore("RTCConnectionStore");
+            if (rtcStore) {
+                const rtc = rtcStore.getRTCConnection && rtcStore.getRTCConnection();
+                const ip = rtc?.ip;
+                if (ip && ip !== lastRoutedVoiceIp && !ip.startsWith("192.168.") && !ip.startsWith("127.")) {
+                    lastRoutedVoiceIp = ip;
+                    bridge.routeVoiceIP(ip).then(r => {
+                        if (r && r.ok) {
+                            console.log(`${TAG} Rota dinamica adicionada para voz: ${ip}`);
+                        }
+                    }).catch(() => {});
+                }
+            }
+        } catch (_) {}
+    }, 3000);
 
     setInterval(attachVoiceButton, 1000);
     window.openProtonVPNModal = openModal;

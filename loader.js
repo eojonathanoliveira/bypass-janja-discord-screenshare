@@ -42,14 +42,17 @@ try {
                 return cachedService;
             };
             const registerHandlers = (prefix) => {
-                electron.ipcMain.handle(`${prefix}Start`, async (event, conf) => {
-                    return getService().startTunnel(conf);
+                electron.ipcMain.handle(`${prefix}Start`, async (event, conf, mode) => {
+                    return getService().startTunnel(conf, mode);
                 });
                 electron.ipcMain.handle(`${prefix}Stop`, async () => {
                     return getService().stopTunnel();
                 });
                 electron.ipcMain.handle(`${prefix}GetStatus`, async () => {
                     return getService().getStatus();
+                });
+                electron.ipcMain.handle(`${prefix}RouteVoiceIP`, async (event, ip) => {
+                    return getService().addVoiceRoute(ip);
                 });
             };
             registerHandlers("ProtonVPN_");
@@ -173,9 +176,10 @@ fs.readFileSync = function (filePath, options) {
                             log: (msg) => { try { ipcRenderer.send("StreamFixLog", msg); } catch (_) {} }
                         };
                         const vpnObj = {
-                            start: (conf) => ipcRenderer.invoke("ProtonVPN_Start", conf),
+                            start: (conf, mode) => ipcRenderer.invoke("ProtonVPN_Start", conf, mode),
                             stop: () => ipcRenderer.invoke("ProtonVPN_Stop"),
-                            getStatus: () => ipcRenderer.invoke("ProtonVPN_GetStatus")
+                            getStatus: () => ipcRenderer.invoke("ProtonVPN_GetStatus"),
+                            routeVoiceIP: (ip) => ipcRenderer.invoke("ProtonVPN_RouteVoiceIP", ip)
                         };
                         if (process.contextIsolated && contextBridge.exposeInMainWorld) {
                             try { contextBridge.exposeInMainWorld("StreamFixBridge", bridgeObj); } catch (_) {}

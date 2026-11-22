@@ -7,6 +7,14 @@ Segunda versão estável do roteador de chamadas e compartilhamento de tela com 
 ## 📋 Changelog (v1.1.0)
 
 ### ✨ Principais Novidades
+- **🛡️ Roteamento Exclusivo para Discord (Internet 100% Protegida)**:
+  - O túnel agora roteia exclusivamente a infraestrutura de voz, vídeo e screenshare do Discord (`66.22.192.0/18` + IP dinâmico do servidor de voz ativo).
+  - Seus navegadores, jogos, Steam e downloads continuam na conexão normal e **sua internet nunca cai**, mesmo se a sessão do arquivo `.conf` expirar.
+  - O DNS do sistema não é mais alterado por diretivas do WireGuard, prevenindo falhas de resolução ao encerrar a VPN.
+
+- **⏱️ Watchdog de Sessão Automático**:
+  - Monitoramento contínuo do handshake do WireGuard. Se o servidor encerrar a sessão por expiração da conta, o túnel é desligado automaticamente sem deixar rotas travadas.
+
 - **🎨 Banner Oficial Meme & Nova Identidade Visual**:
   - Banner full-width no topo do repositório: *"Aqui não Janja!! FAZ O L NA PQP"* com selos de WireGuard, Proton VPN, 1080p60 e Ping LAN 0ms.
   - Badges profissionais Shields.io integradas no topo do README.

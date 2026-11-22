@@ -11,10 +11,16 @@ const CONF_OUTPUT = path.join(__dirname, "proton_discord.conf");
 const STATUS_FILE = path.join(__dirname, "proton_status.json");
 const TUNNEL_NAME = "proton_discord";
 
-// All IPv4 subnets excluding private LAN (192.168.0.0/16)
-// This guarantees local network (SSH, games, Sunshine/Moonlight) remains 100% direct and fast,
-// while all Internet and Discord WebRTC voice/video traffic routes safely through Proton VPN.
-const SPLIT_ALLOWED_IPS = "0.0.0.0/1, 128.0.0.0/2, 192.0.0.0/9, 192.128.0.0/11, 192.160.0.0/13, 192.169.0.0/16, 192.170.0.0/15, 192.172.0.0/14, 192.176.0.0/12, 192.192.0.0/10, 193.0.0.0/8, 194.0.0.0/7, 196.0.0.0/6, 200.0.0.0/5, 208.0.0.0/4, 224.0.0.0/3";
+// 1. Sub-redes dedicadas de Voz, Video e Screenshare do Discord (i3D.net AS49544 + Relays Cloudflare/SFU)
+// Isso garante que APENAS o trafego do Discord passe pelo tunel.
+// Navegacao (Chrome/Edge), Steam, jogos, torrents e downloads continuam 100% diretos na conexao normal.
+const DISCORD_ONLY_ALLOWED_IPS = "66.22.192.0/18, 162.158.0.0/15, 143.244.32.0/20, 104.16.0.0/12, 104.244.42.0/24";
+
+// 2. Modo Completo: Todas as sub-redes IPv4 exceto a rede local privada (192.168.0.0/16)
+const FULL_SPLIT_ALLOWED_IPS = "0.0.0.0/1, 128.0.0.0/2, 192.0.0.0/9, 192.128.0.0/11, 192.160.0.0/13, 192.169.0.0/16, 192.170.0.0/15, 192.172.0.0/14, 192.176.0.0/12, 192.192.0.0/10, 193.0.0.0/8, 194.0.0.0/7, 196.0.0.0/6, 200.0.0.0/5, 208.0.0.0/4, 224.0.0.0/3";
+
+let watchdogInterval = null;
+let tunnelStartTime = 0;
 
 function sleepSync(ms) {
     try {
@@ -71,8 +77,52 @@ function isTunnelRunning() {
     }
 }
 
+function startWatchdog() {
+    stopWatchdog();
+    tunnelStartTime = Date.now();
+    watchdogInterval = setInterval(() => {
+        try {
+            if (!isTunnelRunning()) {
+                stopWatchdog();
+                return;
+            }
+            const WG_CLI = fs.existsSync(path.join(__dirname, "bin", "wg.exe")) ? path.join(__dirname, "bin", "wg.exe") : "C:\\Program Files\\WireGuard\\wg.exe";
+            if (fs.existsSync(WG_CLI)) {
+                const activeName = getActiveTunnelName() || TUNNEL_NAME;
+                const out = execSync(`"${WG_CLI}" show ${activeName} latest-handshakes`, { encoding: "utf-8", shell: "cmd.exe", stdio: ["pipe", "pipe", "ignore"], timeout: 3000 });
+                const parts = out.trim().split(/\s+/);
+                if (parts.length >= 2) {
+                    const handshakeSec = parseInt(parts[1], 10);
+                    const nowSec = Math.floor(Date.now() / 1000);
+                    // Apos 40s de inicializacao, se o handshake parou a mais de 180s, o servidor encerrou a sessao
+                    if (Date.now() - tunnelStartTime > 40000) {
+                        if (handshakeSec > 0 && (nowSec - handshakeSec) > 180) {
+                            console.warn(`[ProtonVPN Watchdog] Sessao expirada (ultimo handshake ha ${nowSec - handshakeSec}s). Desativando tunel para proteger a conexao...`);
+                            stopTunnel();
+                            fs.writeFileSync(STATUS_FILE, JSON.stringify({
+                                active: false,
+                                expired: true,
+                                error: "A sessao do arquivo .conf expirou ou perdeu conexao com o servidor. O tunel foi desativado automaticamente para manter sua internet 100% online.",
+                                lastStopped: new Date().toISOString()
+                            }, null, 2), "utf-8");
+                        }
+                    }
+                }
+            }
+        } catch (_) {}
+    }, 15000);
+}
+
+function stopWatchdog() {
+    if (watchdogInterval) {
+        clearInterval(watchdogInterval);
+        watchdogInterval = null;
+    }
+}
+
 function stopTunnel() {
     try {
+        stopWatchdog();
         const activeName = getActiveTunnelName() || TUNNEL_NAME;
         try {
             runWireGuardCmd(`/uninstalltunnelservice ${activeName}`);
@@ -89,24 +139,39 @@ function stopTunnel() {
     }
 }
 
-function prepareConfig(rawConf) {
+function prepareConfig(rawConf, routingMode = "discord_only", extraIps = []) {
     const lines = rawConf.split(/\r?\n/);
     const outputLines = [];
     let peerSection = false;
     let allowedIpsSet = false;
 
+    let targetAllowedIps = (routingMode === "full") ? FULL_SPLIT_ALLOWED_IPS : DISCORD_ONLY_ALLOWED_IPS;
+    if (extraIps && extraIps.length > 0) {
+        const validIps = extraIps.filter(ip => typeof ip === "string" && /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/.test(ip));
+        if (validIps.length > 0) {
+            targetAllowedIps += ", " + validIps.map(ip => `${ip}/32`).join(", ");
+        }
+    }
+
     for (let rawLine of lines) {
         const line = rawLine.trim();
+
+        // NUNCA incluir diretiva de DNS no WireGuard!
+        // Ao nao definir DNS, o Windows mantem seu DNS normal do roteador/provedor (192.168.0.1, 1.1.1.1, etc.)
+        // garantindo que NENHUMA navegacao do computador caia caso a VPN expire.
+        if (line.startsWith("DNS")) {
+            continue;
+        }
+
         if (line.startsWith("[Peer]")) {
             peerSection = true;
         }
         if (line.startsWith("AllowedIPs")) {
-            // Replace with LAN-safe AllowedIPs
-            outputLines.push(`AllowedIPs = ${SPLIT_ALLOWED_IPS}`);
+            outputLines.push(`AllowedIPs = ${targetAllowedIps}`);
             allowedIpsSet = true;
             continue;
         }
-        // Exclude IPv6 Address from Interface if present (Proton Free drops IPv6)
+        // Excluir IPv6 da interface
         if (line.startsWith("Address") && line.includes(":")) {
             const addrs = line.split("=")[1].split(",").map(a => a.trim()).filter(a => !a.includes(":"));
             if (addrs.length > 0) {
@@ -114,33 +179,53 @@ function prepareConfig(rawConf) {
                 continue;
             }
         }
-        // Exclude IPv6 DNS if present
-        if (line.startsWith("DNS") && line.includes(":")) {
-            const dnsList = line.split("=")[1].split(",").map(d => d.trim()).filter(d => !d.includes(":"));
-            if (dnsList.length > 0) {
-                outputLines.push(`DNS = ${dnsList.join(", ")}`);
-                continue;
-            }
-        }
         outputLines.push(rawLine);
     }
 
     if (peerSection && !allowedIpsSet) {
-        outputLines.push(`AllowedIPs = ${SPLIT_ALLOWED_IPS}`);
+        outputLines.push(`AllowedIPs = ${targetAllowedIps}`);
     }
 
     return outputLines.join("\r\n");
 }
 
-function startTunnel(rawConf) {
+function addVoiceRoute(ip) {
+    if (!ip || typeof ip !== "string" || !/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/.test(ip)) {
+        return { ok: false, error: "IP invalido" };
+    }
+    // IPs locais e de loopback nao devem ser roteados
+    if (ip.startsWith("192.168.") || ip.startsWith("10.") || ip.startsWith("127.")) {
+        return { ok: true, skipped: true };
+    }
+    try {
+        if (isTunnelRunning()) {
+            const WG_CLI = fs.existsSync(path.join(__dirname, "bin", "wg.exe")) ? path.join(__dirname, "bin", "wg.exe") : "C:\\Program Files\\WireGuard\\wg.exe";
+            const activeName = getActiveTunnelName() || TUNNEL_NAME;
+            if (fs.existsSync(WG_CLI)) {
+                const confOut = execSync(`"${WG_CLI}" show ${activeName} allowed-ips`, { encoding: "utf-8", shell: "cmd.exe", stdio: ["pipe", "pipe", "ignore"], timeout: 3000 });
+                const [pubKey, ...currentIps] = confOut.trim().split(/\s+/);
+                if (pubKey && !confOut.includes(ip)) {
+                    const newIps = (currentIps.join(",") + `,${ip}/32`).replace(/^,/, "");
+                    runWireGuardCmd(`set ${activeName} peer ${pubKey} allowed-ips "${newIps}"`);
+                    console.log(`[ProtonVPN] Rota dinamica adicionada para voz do Discord: ${ip}/32`);
+                }
+            }
+        }
+        return { ok: true, ip };
+    } catch (e) {
+        return { ok: false, error: String(e.message || e) };
+    }
+}
+
+function startTunnel(rawConf, routingMode = "discord_only") {
     try {
         if (!fs.existsSync(WIREGUARD_EXE)) {
-            return { ok: false, error: "Motor WireGuard não encontrado em " + WIREGUARD_EXE };
+            return { ok: false, error: "Motor WireGuard nao encontrado em " + WIREGUARD_EXE };
         }
 
-        const safeConf = prepareConfig(rawConf);
+        const safeConf = prepareConfig(rawConf, routingMode);
 
-        // Clean any active tunnels first if running
+        // Limpar qualquer tunel previo se estiver ativo
         if (isTunnelRunning()) {
             stopTunnel();
             sleepSync(800);
@@ -178,9 +263,15 @@ function startTunnel(rawConf) {
             active: running,
             tunnelName: getActiveTunnelName() || TUNNEL_NAME,
             endpoint,
+            routingMode,
             lastStarted: new Date().toISOString()
         };
         fs.writeFileSync(STATUS_FILE, JSON.stringify(status, null, 2), "utf-8");
+
+        if (running) {
+            startWatchdog();
+        }
+
         return { ok: true, status };
     } catch (e) {
         return { ok: false, error: String(e.message || e) };
@@ -206,7 +297,10 @@ function getStatus() {
         tunnelName: activeName || null,
         hasConfig: fs.existsSync(CONF_INPUT),
         savedConfig: savedConf,
-        endpoint: saved.endpoint || (activeName ? "Conectado via WireGuard (" + activeName + ")" : null)
+        endpoint: saved.endpoint || (activeName ? "Conectado via WireGuard (" + activeName + ")" : null),
+        routingMode: saved.routingMode || "discord_only",
+        expired: !!saved.expired,
+        error: saved.error || null
     };
 }
 
@@ -215,5 +309,6 @@ module.exports = {
     stopTunnel,
     getStatus,
     isTunnelRunning,
-    getActiveTunnelName
+    getActiveTunnelName,
+    addVoiceRoute
 };

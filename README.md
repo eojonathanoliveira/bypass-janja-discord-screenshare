@@ -125,6 +125,9 @@ O plugin é reconhecido nativamente pelo Vencord em **Configurações de Usuári
 [ Rede Local (192.168.0.x / LAN) ] ──────────────────────────▶ [ Roteador Local Direto ]
 ```
 
+- **Apenas Discord por Padrão**: O túnel opera em modo exclusivo para chamadas, streams e voz do Discord (`66.22.192.0/18` + IP dinâmico do servidor ativo). Seus navegadores, downloads, Steam e jogos não passam pela VPN e **sua internet nunca cai** mesmo se a sessão do `.conf` expirar.
+- **DNS Intocado e Seguro**: As diretivas de DNS do arquivo `.conf` são ignoradas propositalmente para manter o DNS original da sua máquina intacto, evitando falhas de resolução ao encerrar a VPN.
+- **Watchdog Automático**: Se o servidor da VPN desconectar ou a validade expirar, o serviço detecta a ausência de handshake e encerra o túnel automaticamente, restaurando as rotas sem travar nada.
 - **Rede Local (LAN) Intacta**: Mantém o range `192.168.0.0/16` 100% direto. Conexões SSH, jogos na rede local e Moonlight/Sunshine funcionam sem qualquer latência ou interferência.
 - **FakeNitro Liberado**: Opera sem travas em 1080p / 60fps / Fonte.
 
