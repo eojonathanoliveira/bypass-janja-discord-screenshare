@@ -7,10 +7,14 @@ Segunda versão estável do roteador de chamadas e compartilhamento de tela com 
 ## 📋 Changelog (v1.1.0)
 
 ### ✨ Principais Novidades
-- **🎨 Nova Identidade Visual - "Bypass Janja Discord Screenshare"**:
-  - Modal estilizado com banner e avatar caricatural embutido em alta resolução.
-  - Título oficial atualizado no cabeçalho e na barra de controle de voz.
-  - Badge dedicada `WIREGUARD SCREEN & VOICE ROUTER`.
+- **🎨 Banner Oficial Meme & Nova Identidade Visual**:
+  - Banner full-width no topo do repositório: *"Aqui não Janja!! FAZ O L NA PQP"* com selos de WireGuard, Proton VPN, 1080p60 e Ping LAN 0ms.
+  - Badges profissionais Shields.io integradas no topo do README.
+  - Tópicos e tags oficiais adicionados ao repositório no GitHub.
+
+- **🔌 Integração Nativa no Catálogo de Plugins do Vencord**:
+  - O plugin agora é automaticamente registrado nas tabelas de plugins do Vencord (`Oe` e `yi`).
+  - Aparece diretamente em **Configurações de Usuário -> Vencord -> Plugins -> BypassJanjaDiscordScreenshare**, podendo ser ativado/desativado pelo switch nativo do Discord.
 
 - **📦 Pacote de Instalação Simplificado (Extrair e Usar)**:
   - Eliminação completa de pastas intermediárias confusas (`/plugin`).
