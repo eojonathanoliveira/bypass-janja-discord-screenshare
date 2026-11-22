@@ -111,7 +111,35 @@ try {
     console.warn("[StreamFix Loader] Failed to register eval bridge:", e);
 }
 
-// 3. Helper to bundle extra renderer scripts
+// 3. Helper to bundle extra renderer scripts & dynamically inject BypassJanjaPlugin into Vencord plugin tables
+function patchRendererCode(code) {
+    if (typeof code !== "string" || code.includes("BypassJanjaDiscordScreenshare")) {
+        return code;
+    }
+    const pluginDef = `
+var BypassJanjaPlugin = {
+    name: "BypassJanjaDiscordScreenshare",
+    description: "Bypass janja discord screenshare - Roteia voz, video e compartilhamento de tela via WireGuard embutido, preservando a rede local (192.168.0.0/16).",
+    tags: ["Media", "Voice", "WireGuard", "Screenshare", "VPN"],
+    authors: [{ name: "Jonathan Oliveira", id: 0n }],
+    start() {
+        if (window.initBypassJanjaUI) window.initBypassJanjaUI();
+    },
+    stop() {
+        if (window.stopBypassJanjaUI) window.stopBypassJanjaUI();
+    }
+};
+`;
+    let patched = code;
+    if (patched.includes("var Oe={") && patched.includes("yi={")) {
+        patched = pluginDef + patched;
+        patched = patched.replace("var Oe={", "var Oe={[BypassJanjaPlugin.name]:BypassJanjaPlugin,");
+        patched = patched.replace("yi={", "yi={[BypassJanjaPlugin.name]:{folderName:\"bypassJanja\",userPlugin:true},");
+        console.log("[StreamFix Loader] Dynamically patched BypassJanjaPlugin into Vencord plugin tables (Oe/yi)!");
+    }
+    return patched;
+}
+
 function getExtraRendererScripts() {
     let extra = "";
     try {
@@ -166,11 +194,14 @@ fs.readFileSync = function (filePath, options) {
         }
         if (filePath.endsWith("renderer.js") || filePath.endsWith("vencordDesktopRenderer.js")) {
             try {
+                let code = typeof res === "string" ? res : res.toString("utf-8");
+                code = patchRendererCode(code);
                 const extra = getExtraRendererScripts();
                 if (extra) {
-                    console.log("[StreamFix Loader] Successfully appended extra scripts to renderer bundle via fs.readFileSync!");
-                    return (typeof res === "string" ? res : res.toString("utf-8")) + extra;
+                    code += extra;
                 }
+                console.log("[StreamFix Loader] Successfully prepared renderer bundle via fs.readFileSync!");
+                return code;
             } catch (err) {
                 console.error("[StreamFix Loader] Error injecting scripts via fs.readFileSync:", err);
             }
@@ -190,6 +221,7 @@ try {
                     listener(event, ...args);
                     try {
                         if (typeof event.returnValue === "string") {
+                            event.returnValue = patchRendererCode(event.returnValue);
                             const extra = getExtraRendererScripts();
                             if (extra && !event.returnValue.includes("[ProtonVoiceVPN]")) {
                                 event.returnValue += extra;

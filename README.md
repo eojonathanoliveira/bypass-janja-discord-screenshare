@@ -1,10 +1,20 @@
 # Bypass Janja Discord Screenshare
 
 <p align="center">
-  <img src="assets/janja_burra.webp" alt="Bypass Janja Discord Screenshare" width="128" style="border-radius: 14px;" />
+  <img src="assets/banner_header.png" alt="Bypass Janja Discord Screenshare - Aqui não Janja!! FAZ O L NA PQP" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);" />
 </p>
 
-> Roteamento inteligente e dedicado de voz, vídeo e compartilhamento de tela via WireGuard para clientes Discord modificados (Vencord).
+<p align="center">
+  <a href="https://github.com/eojonathanoliveira/bypass-janja-discord-screenshare/releases"><img src="https://img.shields.io/github/v/release/eojonathanoliveira/bypass-janja-discord-screenshare?color=5865F2&label=Release&logo=github&style=for-the-badge" alt="Release" /></a>
+  <a href="https://vencord.dev/"><img src="https://img.shields.io/badge/Vencord-Official%20Plugin-5865F2?logo=discord&logoColor=white&style=for-the-badge" alt="Vencord" /></a>
+  <a href="https://www.wireguard.com/"><img src="https://img.shields.io/badge/WireGuard-Native%20Tunnel-88171A?logo=wireguard&logoColor=white&style=for-the-badge" alt="WireGuard" /></a>
+  <a href="https://account.protonvpn.com/security"><img src="https://img.shields.io/badge/Proton%20VPN-Free%20Tier-6D4AFF?logo=protonvpn&logoColor=white&style=for-the-badge" alt="Proton VPN" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/LAN%20Ping-0ms%20Bypass-2ecc71?logo=speedtest&logoColor=white&style=for-the-badge" alt="LAN Ping 0ms" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Screenshare-1080p%2060FPS-f1c40f?logo=youtube&logoColor=white&style=for-the-badge" alt="1080p 60FPS" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License MIT" /></a>
+</p>
+
+> Roteamento inteligente e dedicado de voz, vídeo e compartilhamento de tela via WireGuard para clientes Discord modificados (Vencord). *Aqui não Janja! FAZ O L NA PQP!*
 
 ---
 
@@ -100,6 +110,11 @@ O ícone do escudo se integra à barra de controle de voz do Discord, ao lado do
 
 ![Controles de Voz](assets/voice_control_bar.png)
 
+### 3. Integração Nativa no Catálogo de Plugins do Vencord
+O plugin é reconhecido nativamente pelo Vencord em **Configurações de Usuário -> Vencord -> Plugins**. Você pode ativá-lo ou desativá-lo com 1 clique diretamente pelo seletor nativo:
+
+![Catálogo de Plugins Vencord](assets/vencord_plugins_view.png)
+
 ---
 
 ## 🏗️ Como Funciona o Roteamento
@@ -128,12 +143,17 @@ Quando extraído em `%APPDATA%\Vencord\`, todos os arquivos ficam organizados di
 ├── install.bat                    # Atalho do instalador em 1 clique
 ├── install.ps1                    # Script PowerShell de automação
 ├── assets\
+│   ├── banner_header.png          # Banner do repositório
+│   ├── modal_router.png           # Captura do painel do roteador
+│   ├── voice_control_bar.png      # Captura do botão na barra de voz
+│   ├── vencord_plugins_view.png   # Captura da lista nativa de plugins
 │   └── janja_burra.webp           # Ícone do cabeçalho do plugin
 ├── bin\
 │   ├── wireguard.exe              # Motor WireGuard standalone
 │   └── wg.exe                     # Utilitário de linha de comando
 └── dist\
-    └── patcher.js                 # Patcher do Vencord com gancho de inicialização
+    ├── patcher.js                 # Patcher do Vencord com gancho de inicialização
+    └── renderer.js                # Bundle compilado do Vencord com plugin registrado
 ```
 
 ---
