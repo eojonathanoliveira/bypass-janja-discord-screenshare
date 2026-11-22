@@ -23,19 +23,30 @@ function sleepSync(ms) {
 }
 
 function runWireGuardCmd(args) {
+    // 1. Tentar execucao direta (funciona caso o Discord esteja rodando como administrador)
     try {
         return execSync(`"${WIREGUARD_EXE}" ${args}`, { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"], shell: "cmd.exe" });
     } catch (e1) {
-        // Run elevated via localhost SSH
-        const homeDir = process.env.USERPROFILE || "";
-        const adminKey = path.join(homeDir, ".ssh", "id_ed25519");
-        let keyFlag = "";
-        if (fs.existsSync(adminKey)) {
-            keyFlag = `-i "${adminKey}" `;
-        }
-        const sshCmd = `ssh ${keyFlag}-o StrictHostKeyChecking=no -o BatchMode=yes 127.0.0.1 "\"${WIREGUARD_EXE}\" ${args}"`;
-        return execSync(sshCmd, { encoding: "utf-8", shell: "cmd.exe" });
+        // Falha direta por falta de privilegios de administrador.
     }
+
+    // 2. Tentar Tarefa Agendada (criada pelo install.bat/install.ps1 com privilegios de SYSTEM - 0 prompts)
+    try {
+        const cmdFile = path.join(__dirname, "wireguard_cmd.txt");
+        fs.writeFileSync(cmdFile, args, "utf-8");
+        const res = execSync('schtasks /Run /TN "BypassJanjaWireGuard"', { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"], shell: "cmd.exe" });
+        if (res.includes("SUCESSO") || res.includes("SUCCESS")) {
+            sleepSync(600);
+            return res;
+        }
+    } catch (e2) {
+        // Tarefa agendada nao configurada ou indisponivel
+    }
+
+    // 3. Fallback Universal: Elevacao nativa do Windows (UAC) via PowerShell
+    // Funciona perfeitamente mesmo se o usuario apenas extraiu o ZIP sem rodar o instalador
+    const psCmd = `Start-Process -FilePath '${WIREGUARD_EXE}' -ArgumentList '${args.replace(/'/g, "''")}' -Verb RunAs -WindowStyle Hidden -Wait`;
+    return execSync(`powershell -NoProfile -WindowStyle Hidden -Command "${psCmd}"`, { encoding: "utf-8", shell: "cmd.exe" });
 }
 
 function getActiveTunnelName() {

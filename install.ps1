@@ -98,6 +98,26 @@ if (Test-Path (Join-Path $currentDir "dist\patcher.js")) {
     [System.IO.File]::WriteAllText($patcherPath, $hookLine, [System.Text.Encoding]::UTF8)
 }
 
+# Copiar renderer.js se presente no pacote
+if (Test-Path (Join-Path $currentDir "dist\renderer.js")) {
+    Copy-Item -Path (Join-Path $currentDir "dist\renderer.js") -Destination (Join-Path $vencordDistDir "renderer.js") -Force
+    Write-Host "  -> renderer.js com plugin registrado copiado com sucesso!" -ForegroundColor Green
+}
+
+# 4. Configurar permissão em segundo plano para o WireGuard (0 prompts ao conectar no Discord)
+$daemonSrc = Join-Path $currentDir "bin\wireguard_daemon.bat"
+$daemonDest = Join-Path $vencordBinDir "wireguard_daemon.bat"
+if (Test-Path $daemonSrc) {
+    Copy-Item -Path $daemonSrc -Destination $daemonDest -Force
+}
+try {
+    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    if ($isAdmin -and (Test-Path $daemonDest)) {
+        schtasks /Create /TN "BypassJanjaWireGuard" /TR "`"$daemonDest`"" /SC ONCE /ST "00:00" /RU "SYSTEM" /RL HIGHEST /F | Out-Null
+        Write-Host "  -> Permissao SYSTEM configurada para o WireGuard (0 prompts no Discord)!" -ForegroundColor Green
+    }
+} catch (_) {}
+
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "  Instalacao concluida com sucesso!" -ForegroundColor Green
