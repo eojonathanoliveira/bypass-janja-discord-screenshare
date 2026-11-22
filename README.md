@@ -50,7 +50,7 @@ Você pode usar qualquer servidor WireGuard, mas o **Proton VPN oferece configur
 
 ---
 
-## 🚀 Como Instalar (2 Formatos)
+## 🚀 Como Instalar (3 Formatos)
 
 ### Formato 1: Modo Rápido (Extrair e Reiniciar) ⭐ RECOMENDADO
 
