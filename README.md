@@ -55,16 +55,50 @@ Modal acessível diretamente pelo cliente para importação ou inserção da con
 
 ```text
 ├── assets/
-│   ├── modal_router.png       # Captura sanitizada do painel
-│   └── voice_control_bar.png  # Captura do botão na barra de voz
-├── plugin/
-│   ├── loader.js              # Carregador e ponte IPC Electron
-│   ├── proton_vpn_service.js  # Gerenciador do motor WireGuard e rotas
-│   └── proton_vpn_ui.js       # Componente de interface nativa
-├── proton_vpn.example.conf    # Modelo de configuração de exemplo
-├── install.ps1                # Script de instalação para Windows
-└── .gitignore                 # Filtro de arquivos locais e temporários
+│   ├── modal_router.png               # Captura sanitizada do painel
+│   └── voice_control_bar.png          # Captura do botão na barra de voz
+├── plugin/                            # Pacote pré-compilado para clientes em uso
+│   ├── loader.js                      # Carregador e ponte IPC Electron
+│   ├── proton_vpn_service.js          # Gerenciador do motor WireGuard e rotas
+│   └── proton_vpn_ui.js               # Componente de interface nativa
+├── src/plugins/wireguardCallRouter/   # Código-fonte oficial do plugin Vencord (TypeScript)
+│   ├── index.tsx                      # Definição oficial do plugin e configurações
+│   └── native.ts                      # Backend nativo IPC Electron (padrão Vencord)
+├── proton_vpn.example.conf            # Modelo de configuração de exemplo
+├── install.bat                        # Instalador em 1 clique (duplo clique)
+├── install.ps1                        # Script PowerShell de instalação
+└── .gitignore                         # Filtro de arquivos locais e temporários
 ```
+
+---
+
+## 🛠️ Como Instalar (2 Formatos)
+
+### Formato 1: Pacote Pré-Empacotado (Usuário Final)
+Se você já usa o Discord com Vencord pré-instalado e quer apenas ativar o plugin:
+
+1. Baixe o ZIP da [Release v1.0.0](https://github.com/eojonathanoliveira/discord-wireguard-call-router/releases/tag/v1.0.0) ou clone o repositório.
+2. Dê um **duplo clique no arquivo `install.bat`** (ou copie a pasta `plugin/` para `%APPDATA%\Vencord\`).
+3. Abra o Discord, entre em um canal de voz e clique no escudo verde para ativar.
+
+---
+
+### Formato 2: Código Oficial do Vencord (Para Pull Request / Vencord Source)
+Se você está compilando o Vencord a partir do código-fonte ou deseja submeter o plugin para inclusão na lista oficial do Vencord (`Vendicated/Vencord`):
+
+1. Clone o repositório oficial do Vencord:
+   ```bash
+   git clone https://github.com/Vendicated/Vencord.git
+   cd Vencord
+   pnpm install
+   ```
+2. Copie a pasta `src/plugins/wireguardCallRouter` deste repositório para `src/plugins/` (ou `src/userplugins/`) do Vencord.
+3. Compile e injete no Discord:
+   ```bash
+   pnpm build
+   pnpm inject
+   ```
+4. O plugin aparecerá nativamente nas configurações do Discord: **Configurações de Usuário -> Vencord -> Plugins -> WireGuardCallRouter**!
 
 ---
 
