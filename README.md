@@ -85,6 +85,67 @@ Modal acessível diretamente pelo cliente para importação ou inserção da con
 
 ---
 
+## 📖 Manual de Instalação Manual (Passo a Passo)
+
+Caso prefira não executar o script automático, siga as etapas manuais:
+
+1. **Copiar os Arquivos do Plugin**:
+   - Acesse `%APPDATA%\Vencord\` no Explorer.
+   - Copie os arquivos da pasta `plugin/` (`loader.js`, `proton_vpn_service.js`, `proton_vpn_ui.js`) para `%APPDATA%\Vencord\`.
+
+2. **Configurar os Binários**:
+   - Crie a pasta `%APPDATA%\Vencord\bin\`.
+   - Copie `wireguard.exe` e `wg.exe` para `%APPDATA%\Vencord\bin\`.
+
+3. **Vincular o Carregador**:
+   - Abra `%APPDATA%\Vencord\dist\patcher.js` em um editor.
+   - Na primeira linha, adicione:
+     ```javascript
+     try { require("../loader.js"); } catch (e) {}
+     ```
+   - Salve o arquivo.
+
+4. **Reiniciar e Ativar**:
+   - Reinicie o Discord (`Ctrl + R`).
+   - Entre em um canal de voz, clique no ícone de escudo e ative o roteador.
+
+---
+
+## 🤖 Prompt para Instalação Automatizada por I.A.
+
+Copie e envie o prompt abaixo para seu assistente de Inteligência Artificial (ChatGPT, Claude, Cursor, Copilot, Antigravity, etc.) para instalação 100% automatizada:
+
+```text
+Você é um assistente técnico de automação no Windows. Execute a instalação e configuração do projeto "Discord WireGuard Call Router" nesta máquina seguindo com rigor as etapas abaixo:
+
+1. Clone o repositório oficial em uma pasta temporária:
+   git clone https://github.com/eojonathanoliveira/discord-wireguard-call-router.git "$env:TEMP\discord-router"
+
+2. Copie os arquivos principais do plugin para o diretório do Vencord:
+   - Destino: "$env:APPDATA\Vencord\"
+   - Arquivos a copiar: `plugin\loader.js`, `plugin\proton_vpn_service.js`, `plugin\proton_vpn_ui.js`
+
+3. Garanta os binários do motor WireGuard:
+   - Crie o diretório "$env:APPDATA\Vencord\bin" (se não existir).
+   - Se o WireGuard já estiver instalado em "C:\Program Files\WireGuard\", copie `wireguard.exe` e `wg.exe` para "$env:APPDATA\Vencord\bin\".
+
+4. Configure o gancho de inicialização (autoload) no Vencord:
+   - Verifique o arquivo "$env:APPDATA\Vencord\dist\patcher.js".
+   - Se o arquivo ainda não contiver `loader.js`, insira exatamente na primeira linha:
+     try { require("../loader.js"); } catch (e) {}
+
+5. Reinicie o Discord para aplicar as alterações:
+   - Finalize os processos do Discord com Stop-Process -Name Discord -Force.
+   - Inicie o Discord novamente via "$env:LOCALAPPDATA\Discord\Update.exe --processStart Discord.exe".
+
+6. Valide a instalação:
+   - Confirme que os arquivos estão presentes em "$env:APPDATA\Vencord\".
+   - Confirme que o Discord está em execução.
+   - Informe ao usuário que a instalação foi concluída e oriente-o a entrar em uma chamada e clicar no ícone de escudo para ativar a rota.
+```
+
+---
+
 ## 🔒 Privacidade e Segurança
 
 - **Nenhuma chave privada é versionada**: Arquivos `.conf` locais são explicitamente ignorados pelo `.gitignore`.
